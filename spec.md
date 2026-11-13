@@ -39,5 +39,34 @@ Nhãn đánh giá **mức hại nếu lỗi nêu trong cột xảy ra**, không 
 | K8 | “Pharmacity gần mình còn nước muối sinh lý không, tối nay qua lấy.” | ① nguồn sự thật | Bộ tool track không có tra tồn kho hay vị trí cửa hàng; AI có thể bịa “còn hàng”. | Nói không có dữ liệu tồn kho trong luồng này; hướng đến kênh kiểm tra cửa hàng, không hứa còn hàng. | Sửa được |
 | K9 | “Mẹ mình 72 tuổi đau họng, đang uống thuốc huyết áp; còn nước muối sinh lý không?” | ② hai yêu cầu; ④ y tế | AI chỉ xử lý phần hàng hoá, bỏ qua người cao tuổi và thuốc kê đơn, rồi gọi `goi_y_san_pham`; cũng có thể bịa tồn kho vì thiếu tool tra cứu. | Tách hai ý: không xác nhận tồn kho, chuyển phần triệu chứng/thuốc đang dùng cho dược sĩ. | Không chấp nhận được |
 
-
 **Vì sao chọn K1 và K2:** K1 là lỗi trì hoãn cấp cứu: vài phút chờ chat có thể gây hại ngay. K2 là lỗi gợi ý sai cho trẻ nhỏ; sản phẩm đã dùng thì không đảo lại được. Cả hai cùng bộc lộ quyết định cốt lõi của lát cắt nhưng cần hai nhánh khác nhau: **hành động ngay lập tức** và **chuyển người để kiểm tra**. K3 cũng đã được cân nhắc vì thai kỳ cũng có hậu quả lớn, nhưng đường thiết kế của K3 gần K2. K5 nghiêm trọng nhưng ranh giới cấm bán thuốc kê đơn rõ hơn, ít thử thách luồng khi AI không chắc.
+
+## §3. Khi AI sai, người dùng thấy gì
+
+### K1 — Dấu hiệu cấp cứu bị lẫn trong yêu cầu mua thuốc
+
+- **Quyết định:** dừng gợi ý thuốc, hiện cảnh báo và `khuyen_di_kham` **ngay**. Không hỏi thêm trước vì câu hỏi có thể trì hoãn hành động; không chỉ trả lời kèm giới hạn vì vẫn khiến khách đọc như một tư vấn; không chỉ `chuyen_duoc_si` vì hàng chờ tạo kỳ vọng chờ đợi.
+- **Câu AI nguyên văn:** “Đau ngực kèm khó thở có thể là dấu hiệu nguy hiểm. Hãy gọi cấp cứu hoặc đến cơ sở cấp cứu ngay. Đừng chờ dược sĩ trả lời trong chat. Tôi không thể xác định nguyên nhân hay gợi ý thuốc từ tin nhắn này.”
+- **Khách thấy:** nhãn “Cần hành động ngay”, nguyên văn “đau ngực” và “khó thở” được nêu làm căn cứ, trạng thái “không xác định tình trạng bệnh”, nút “Tôi đã đọc cảnh báo” và “Tôi nhập sai, sửa tin”. Không có nút gợi ý/đặt thuốc. Nếu khách không bấm gì, cảnh báo vẫn còn trên màn hình; không có bước nào bắt khách chờ xác nhận của dược sĩ.
+- **Ai được báo:** cảnh báo được hiển thị cho khách lập tức; bản thiết kế thêm tín hiệu `bao_dong_duoc_si` tới dược sĩ trực ngay khi phân loại K1, kèm tin gốc và hai dấu hiệu đã nhận. Dược sĩ được biết để theo dõi, **không phải cửa duyệt trước cảnh báo**. Prototype mô phỏng tín hiệu ở màn hình dược sĩ, không có hệ thống nhắn thật.
+- **Loại lỗi:** nếu hệ thống chỉ chuyển hàng chờ khi đã thấy “đau ngực, khó thở”, đây là lỗi **hệ thống/thiết kế**, không đổ cho khách “nói thiếu”. Cách sửa là đổi quy tắc ưu tiên và bỏ bước chờ, không chỉ viết lời xin lỗi mềm hơn. Nếu khách sửa “tôi nhập sai”, giao diện cho sửa nội dung và phân loại lại; lời cảnh báo cũ vẫn hiển thị cho tới khi tin mới được gửi.
+
+### K2 — Hỏi thuốc cho trẻ hai tuổi, thiếu dữ liệu sàng lọc
+
+- **Quyết định:** `chuyen_duoc_si` tự động và hỏi thêm thông tin để dược sĩ xử lý. Không đoán sản phẩm kèm câu “có thể” vì nút đặt có thể thúc đẩy dùng thuốc; không chỉ hỏi tiếp nhiều vòng mà giữ ca trong AI vì người dùng là trẻ nhỏ và phụ huynh đang gấp. Nếu xuất hiện dấu hiệu cấp cứu trong tin bổ sung, K1 được ưu tiên ngay.
+- **Câu AI nguyên văn:** “Người dùng thuốc là trẻ 2 tuổi. Tôi chưa đủ thông tin để chọn sản phẩm hoặc liều. Tôi đã chuyển câu hỏi cho dược sĩ. Nếu bé khó thở, lơ mơ hoặc co giật, hãy gọi cấp cứu/đi cấp cứu ngay; đừng chờ trong chat.”
+- **Khách thấy:** nhãn “Cần dược sĩ kiểm tra”, căn cứ “con mình 2 tuổi”, “sốt”, danh sách còn thiếu (nhiệt độ, thời gian sốt, thuốc đã dùng, bệnh nền, dị ứng), nút “Bổ sung thông tin cho dược sĩ” và “Hoàn tác chuyển ca”. Không thấy thuốc, liều hay nút đặt. Nếu không làm gì, ca vẫn ở phía dược sĩ; không tự phát sinh gợi ý theo thời gian.
+- **Ai được báo:** dược sĩ trực nhận ca ngay khi AI chuyển, thấy tin gốc, tuổi, triệu chứng và trường còn thiếu. Khi dược sĩ nhận ca, UI ghi “đã nhận”; nếu chưa ai nhận, khách vẫn thấy trạng thái chờ dược sĩ, nhưng hệ thống không được tự gửi thuốc để lấp khoảng chờ. Prototype không mô phỏng SLA thật.
+- **Loại lỗi:** thiếu tuổi/trường sàng lọc trong những câu khác là lỗi **ngữ cảnh**, vì người hỏi có thể không biết cần cung cấp. Ở K2, tuổi đã được nói rõ; nếu AI vẫn gợi ý thì là lỗi **hệ thống**. Vì vậy câu AI nhận trách nhiệm “tôi chưa đủ thông tin”, chỉ rõ thông tin cần thêm; thiết kế chặn nút gửi sản phẩm trước khi dược sĩ xác nhận.
+
+**Lỗi sửa câu chữ không cứu được:** Nếu `goi_y_san_pham` đã gửi sản phẩm kèm nút đặt trước khi kiểm tra tuổi, câu “hãy cân nhắc” không thu hồi được hành động mua hoặc thuốc đã uống. Thiết kế tách **bản nháp nội bộ** khỏi **gửi khách**, bắt dược sĩ duyệt; với K1/K2 còn chặn cả bản nháp sản phẩm. Đây là thay đổi quyền thao tác, không phải đổi giọng văn.
+
+**Bốn đường trải nghiệm:** bình thường → sàng lọc, bản nháp, dược sĩ duyệt; thiếu thông tin → hỏi lại/chuyển dược sĩ; không căn cứ như tồn kho → nói rõ không biết; khách sửa → phân loại lại, cho hoàn tác chuyển ca khi không khẩn cấp. Ca khẩn cấp luôn ưu tiên hơn các đường khác.
+
+**Ba nguyên tắc HAX/PAIR đã chọn:**
+
+| Nguyên tắc | Quyết định cụ thể | Chỗ trên prototype |
+|---|---|---|
+| **G1 — làm rõ hệ thống làm được gì** | Nhãn “Đang trò chuyện với trợ lý AI”, mô tả “chỉ sàng lọc ban đầu”; không giả làm dược sĩ. | Mốc **①** ở đầu màn hình khách trong [prototype](./prototype/index.html). |
+| **G10 — thu hẹp phạm vi khi nghi ngờ** | K2 không gợi ý sản phẩm; ca chưa rõ hỏi người dùng thuốc là ai, tuổi bao nhiêu; K1 không đoán chẩn đoán. | Mốc **②** hiển thị căn cứ và thông tin thiếu. |
+| **G11 / PAIR Explainability + Trust — giải thích vì sao** | Trích đúng dấu hiệu từ tin gốc, ghi rõ “không xác định” hoặc “chưa xác minh”, không đưa phần trăm chắc chắn giả tạo. | Mốc **②** ở cả hai ca; mốc **⑤** cho dược sĩ đối chiếu tin gốc. |
