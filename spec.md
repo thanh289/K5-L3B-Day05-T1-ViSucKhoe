@@ -70,3 +70,29 @@ Nhãn đánh giá **mức hại nếu lỗi nêu trong cột xảy ra**, không 
 | **G1 — làm rõ hệ thống làm được gì** | Nhãn “Đang trò chuyện với trợ lý AI”, mô tả “chỉ sàng lọc ban đầu”; không giả làm dược sĩ. | Mốc **①** ở đầu màn hình khách trong [prototype](./prototype/index.html). |
 | **G10 — thu hẹp phạm vi khi nghi ngờ** | K2 không gợi ý sản phẩm; ca chưa rõ hỏi người dùng thuốc là ai, tuổi bao nhiêu; K1 không đoán chẩn đoán. | Mốc **②** hiển thị căn cứ và thông tin thiếu. |
 | **G11 / PAIR Explainability + Trust — giải thích vì sao** | Trích đúng dấu hiệu từ tin gốc, ghi rõ “không xác định” hoặc “chưa xác minh”, không đưa phần trăm chắc chắn giả tạo. | Mốc **②** ở cả hai ca; mốc **⑤** cho dược sĩ đối chiếu tin gốc. |
+
+## §4. Mức tự chủ
+
+**Quy tắc ưu tiên:** Nhận dấu hiệu nguy hiểm → phát cảnh báo ngay, không gợi ý thuốc; Người dùng là trẻ nhỏ, người cao tuổi, mang thai/cho con bú, có bệnh mạn hoặc đang dùng thuốc kê đơn → chuyển dược sĩ. Trước mọi gợi ý cần đủ người dùng thuốc, tuổi, thai kỳ/cho con bú, thuốc đang dùng, bệnh nền/dị ứng, thời gian triệu chứng và đã dùng gì. Thiếu trường thì hỏi hoặc chuyển, không đoán. Đây là luật thiết kế trên dữ liệu dựng, không phải một bộ phân loại y khoa đã được kiểm chứng.
+
+| Tool | Mức và người quyết định | Cái giá nếu sai; đảo lại; cái giá khi chờ | Phương án đã loại |
+|---|---|---|---|
+| `goi_y_san_pham` | **Cần dược sĩ duyệt.** AI chỉ soạn bản nháp; dược sĩ thấy tin gốc, thông tin sàng lọc, điều chưa chắc và tên sản phẩm trước khi bấm gửi. Không duyệt thì không gửi; quá hạn thì vẫn chờ/chuyển ca, không tự gửi. | Sai làm người dùng thuốc có thể uống nhầm; khi đã uống không đảo được. Chờ dược sĩ tốn thời gian nhưng thường rẻ hơn hại sức khoẻ. | Tự gửi kèm disclaimer: disclaimer không chặn nút đặt; cấm hoàn toàn: mất ích lợi ở ca đủ thông tin và được dược sĩ kiểm tra. |
+| `chuyen_duoc_si` | **Tự làm**, có hoàn tác ở ca không khẩn cấp; dược sĩ thấy tin gốc, lý do chuyển và dữ liệu thiếu. Không có duyệt trước. | Chuyển nhầm tốn vài phút và tải cho dược sĩ, đảo được. Chờ một người duyệt việc chuyển có thể kéo dài ca nguy hiểm. | Bắt khách duyệt: thêm bước khi họ đang gấp; cấm tự chuyển: dễ bỏ sót nhóm nguy cơ. Với K1, chuyển không được thay cảnh báo tức thì. |
+| `khuyen_di_kham` | **Tự làm ngay** khi có dấu hiệu nguy hiểm; không cần duyệt. Khách có thể báo nhập sai nhưng cảnh báo đã phát không bị thu hồi trước khi đọc. | Dương tính giả làm khách lo và tốn thời gian; âm tính giả có thể trì hoãn cấp cứu, không đảo được. Chờ dược sĩ phê duyệt cảnh báo còn đắt hơn. | Cần duyệt: chậm ở K1; cấm AI cảnh báo: không đạt mục tiêu ca nguy hiểm không chờ. |
+| `luu_ghi_chu_suc_khoe` | **Cấm AI gọi** trong lát cắt. Chỉ thiết kế lại ở phiên bản khác với đồng ý riêng và cơ chế quản trị dữ liệu. | Xoá được bản ghi nhưng không thu hồi được thông tin đã lộ; không lưu làm dược sĩ phải đọc lại tin, giá thấp hơn rủi ro riêng tư. | Tự lưu: trái yêu cầu đồng ý; chỉ cần khách bấm duyệt: vẫn chưa có mục đích lưu và thời hạn lưu rõ ràng trong fixture. |
+| `ban_thuoc_ke_don` | **Cấm** trong chat AI. Không có nút giao dịch. | Bán sai không đảo được nếu thuốc đã dùng; chờ dược sĩ/cơ sở khám chữa bệnh là bước cần thiết. | Tự bán hoặc khách xác nhận: khách không thay thế được kiểm tra đơn và thẩm quyền chuyên môn. |
+
+**Tool khó xếp nhất — `goi_y_san_pham`:** Ba người phụ trách ba lập luận để kiểm tra quyết định: **Thành** bảo vệ mức *tự làm* ở ca người lớn đã sàng lọc đủ vì chờ dược sĩ làm mất tốc độ; **Tâm** bảo vệ mức *cấm* vì nút đặt có thể khiến khách dùng sản phẩm trước khi phát hiện AI hiểu sai người dùng thuốc như K2; **Huy** đề xuất mức *cần dược sĩ duyệt*, tách bản nháp khỏi thao tác gửi. Nếu tự làm, K2 có thể nhận sản phẩm khi chưa biết trẻ đang dùng thuốc gì; nếu cấm, ca thông thường cũng phải chuyển từ đầu và tính năng mất giá trị. Nhóm chốt **dược sĩ duyệt bản nháp** vì sự chậm ở ca thông thường có thể chịu được, còn thuốc đã dùng không thể hoàn tác. Đây là ba lập luận được phân công trình bày; nhóm cần xác nhận lại nếu ý kiến thực tế của từng người khác.
+
+**Tool thêm/tách bước:** tách `goi_y_san_pham` thành `soan_nhap_goi_y` (nội bộ, không hiện khách) và `gui_goi_y_da_duyet` (chỉ sau dược sĩ duyệt). Điều này chặn lỗi ở K2 khi AI tạo câu đúng tình cờ nhưng chưa có người kiểm tra. Thêm `bao_dong_duoc_si` (thông báo ưu tiên, tự làm) cho K1: dược sĩ thấy ca ngay, còn lời cảnh báo cho khách không bị chặn bởi hàng chờ. Đây là quyết định sản phẩm bổ sung, không phải tool có sẵn trong track.
+
+**Thử mức đã đặt:**
+
+| Ca | Sai ban đầu có bị chặn? | AI còn làm khi lẽ ra phải hỏi? | Người bình thường chờ vô ích? |
+|---|---|---|---|
+| K1 đau ngực, khó thở | Có: cấm gợi ý, cảnh báo ngay; báo dược sĩ không giữ khách lại. | Không hỏi trước cảnh báo, vì hỏi làm chậm hành động. Nếu tín hiệu nhận sai, khách có nút sửa tin. | Không áp dụng; rủi ro chờ lớn hơn. |
+| K2 trẻ 2 tuổi sốt | Có: không có gợi ý/đặt; chuyển dược sĩ. | AI chỉ hỏi thông tin còn thiếu, không ra sản phẩm hay liều. | Phụ huynh chờ dược sĩ; đây là chi phí có chủ đích vì trẻ nhỏ. |
+| Ca thường: người lớn 29 tuổi, đau họng nhẹ 2 ngày, tự khai không có yếu tố nguy cơ | Có: bản nháp chỉ ở phía dược sĩ. | AI vẫn cần dược sĩ đối chiếu lời khai; không tự gửi. | Có chờ một bước duyệt. Nhóm chấp nhận để không đổi lấy rủi ro sản phẩm sai; có thể tối ưu thời gian duyệt sau khi đo thực tế. |
+
+**Lời hứa với người dùng đã đổi:** từ “AI sẽ tìm thuốc và gửi ngay” thành **“AI sàng lọc và soạn đề xuất; dược sĩ kiểm tra trước khi bạn thấy gợi ý sản phẩm.”** Với dấu hiệu cấp cứu, lời hứa là **cảnh báo ngay**, không phải “dược sĩ sắp trả lời”.
