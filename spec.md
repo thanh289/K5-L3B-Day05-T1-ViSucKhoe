@@ -3,9 +3,9 @@
 
 | Họ và tên | Mã học viên | Việc đã làm và sẽ trình bày |
 |---|---|---|
-| Trần Duy Thành | 2A202603919 | |
-| Nguyễn Thành Tâm | 2A202603933 |  |
-| Trịnh Gia Huy | 2A202603924 |  |
+| Trần Duy Thành | 2A202603919 | K1, K2, K3 và lí do chọn K1  + K2 phần §1; §6|
+| Nguyễn Thành Tâm | 2A202603933 | K3, K4, K5 phần §1; §3; §4 |
+| Trịnh Gia Huy | 2A202603924 | K6, K7, K8 phần §1; §5 + Prototype |
 
 **Cần nhóm bổ sung trước khi nộp:** họ tên đầy đủ và mã học viên của cả ba người. Phân việc trên là phương án nhóm dùng để trình bày; mỗi người cần xem lại và giải thích được phần được ghi tên. Ca lạ trong §7 sẽ được ghi sau buổi demo.
 
@@ -146,3 +146,17 @@ Phần G1 (nhãn “trợ lý AI, không phải dược sĩ” và hộp “làm
 **Ảnh minh chứng:** [Màn hình khách](./prototype/khach.png) (K1 và K2, thấy mốc ①–③, ⑥–⑨) và [Màn hình dược sĩ](./prototype/duoc-si.png) (K1, K2 và ca thường, thấy mốc ④, ⑤), chụp từ bản hiện tại. Mở nhanh một ca bằng đường dẫn, ví dụ `index.html#K1+K2` hoặc `index.html#K1+K2+N,pharm`.
 
 **Quyết định giao diện:** Chọn nhãn trạng thái “cần hành động ngay / cần dược sĩ / đang chờ duyệt” cùng dấu hiệu trích nguyên văn vì người dùng có thể kiểm xem AI đã hiểu nhầm chỗ nào. Đã cân nhắc phần trăm độ tin cậy, nhưng không có dữ liệu hiệu chuẩn nên dễ tạo cảm giác chính xác giả; thay bằng biết / chưa biết / không thể làm. Đã cân nhắc nút “Đặt ngay” dưới bản nháp, nhưng nó biến bản nháp chưa duyệt thành gợi ý có tác động thực; nút gửi chỉ ở phía dược sĩ. Đã cân nhắc ẩn lý do chuyển người để giao diện gọn, nhưng giữ lý do và trường thiếu để phụ huynh biết cần bổ sung gì. Đã cân nhắc cho khách tắt cảnh báo hoặc tắt sàng lọc để nhanh hơn; không cho, vì điều khiển của khách chỉ được đẩy hệ thống về phía thận trọng hơn.
+
+
+## §6. Tốt là gì
+
+
+| Tiêu chí | Quy tắc Pass | K1 | K2 |
+|---|---|---|---|
+| **C1 — ưu tiên đúng ca nguy hiểm** | Tin có “đau ngực” và “khó thở” hiện cảnh báo đi cấp cứu trong cùng lượt trả lời, không yêu cầu đợi dược sĩ; tin không có các dấu hiệu này không bị gắn nhãn cấp cứu. | Pass | Pass |
+| **C2 — nhóm nguy cơ không nhận thuốc tự động** | Tin nói người dùng là trẻ 2 tuổi thì không có tên sản phẩm/liều/nút đặt trên màn hình khách trước khi dược sĩ duyệt. | Pass  | Pass |
+| **C3 — người xem biết lý do và đường tiếp** | Mỗi ca hiện ít nhất một dấu hiệu trích từ tin gốc, giới hạn thông tin, nút hành động; dược sĩ thấy tin gốc nếu được báo/chuyển. | Pass | Pass |
+
+**Lỗi còn lại:** Bộ nhận diện trong prototype là luật chuỗi đơn giản, chưa được kiểm chứng với cách viết tắt, phủ định hay câu mơ hồ. Ví dụ như “không khó thở” có thể bị nhận là khẩn cấp. Về cơ bản đây chỉ là prototype thôi nên chắc chắn đây không được dùng để vận hành thật. Trước phát hành cần thiết kế và kiểm thử bộ sàng lọc với chuyên gia y tế và ca diễn đạt đa dạng.
+
+## §7. Demo
