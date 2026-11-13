@@ -96,3 +96,53 @@ Nhãn đánh giá **mức hại nếu lỗi nêu trong cột xảy ra**, không 
 | Ca thường: người lớn 29 tuổi, đau họng nhẹ 2 ngày, tự khai không có yếu tố nguy cơ | Có: bản nháp chỉ ở phía dược sĩ. | AI vẫn cần dược sĩ đối chiếu lời khai; không tự gửi. | Có chờ một bước duyệt. Nhóm chấp nhận để không đổi lấy rủi ro sản phẩm sai; có thể tối ưu thời gian duyệt sau khi đo thực tế. |
 
 **Lời hứa với người dùng đã đổi:** từ “AI sẽ tìm thuốc và gửi ngay” thành **“AI sàng lọc và soạn đề xuất; dược sĩ kiểm tra trước khi bạn thấy gợi ý sản phẩm.”** Với dấu hiệu cấp cứu, lời hứa là **cảnh báo ngay**, không phải “dược sĩ sắp trả lời”.
+
+## §5. Prototype
+
+- **File:** [prototype/index.html](./prototype/index.html). Mở trực tiếp trong trình duyệt. Công cụ: HTML/CSS/JavaScript thuần; không cần đăng nhập, backend hoặc API key.
+- **Phạm vi mô phỏng:** hai góc nhìn trong cùng prototype: khách và dược sĩ. Tin nhắn, sản phẩm minh hoạ, quy tắc nhận diện (theo từ khoá) và thao tác duyệt đều là fixture. **Không có lời gọi AI thật**; không nhận bonus +3. Prototype không dùng dữ liệu người thật hoặc xác nhận tồn kho.
+- **Bao phủ kịch bản:** cả chín ca K1–K9 trong §2 có nút mẫu riêng, cộng thêm ca thông thường. Người dùng cũng có thể gõ tin tự do; tin không khớp luật sẽ được hỏi lại, không đoán.
+
+| Ca | Nhánh prototype | Hành vi thấy được |
+|---|---|---|
+| K1 đau ngực, khó thở | Cảnh báo khẩn | Cảnh báo ngay, không hiện thuốc; dược sĩ nhận `bao_dong_duoc_si` ở đầu hàng; “Tôi nhập sai” cho sửa tin nhưng cảnh báo cũ ở lại đến khi gửi tin mới. |
+| K2 trẻ 2 tuổi sốt | Chuyển dược sĩ | Nêu danh sách còn thiếu, phiếu bổ sung (nhiệt độ, thời gian, thuốc đã dùng, bệnh nền, dị ứng), hoàn tác chuyển ca. |
+| K3 thai kỳ | Nhóm nguy cơ | Nói rõ không thể bảo đảm “chắc chắn an toàn” qua chat; chuyển dược sĩ. |
+| K4 đau họng thiếu thông tin | Hỏi sàng lọc | Phiếu hỏi nhanh (ai dùng, tuổi, thời gian, yếu tố nguy cơ); đủ và không nguy cơ thì thành ca thông thường, có nguy cơ thì chuyển dược sĩ. |
+| K5 amoxicillin không đơn | Ngoài thẩm quyền | Từ chối bán và không gợi ý thay thế; không có nút giao dịch. |
+| K6 không đỡ, xin “mạnh hơn” | Chuyển dược sĩ | Hỏi đã dùng gì, bao lâu; không nâng thuốc. |
+| K7 giục bỏ hỏi, lưu bệnh | Giải thích giới hạn | Nêu câu hỏi tối thiểu, không lưu hồ sơ, không đặt thay; dẫn tới phiếu hỏi nhanh. |
+| K8 tồn kho | Không có dữ liệu | Nói rõ không biết còn hàng, hướng sang kênh kiểm tra cửa hàng. |
+| K9 hai ý trong một tin | Tách đôi | Phần hàng hoá: không có dữ liệu; phần người cao tuổi và thuốc huyết áp: chuyển dược sĩ. |
+| Ca thường | Nháp + duyệt | Bản nháp chỉ ở phía dược sĩ; duyệt thì khách mới thấy gợi ý, từ chối thì khách được hỏi thêm. |
+
+**Mô hình ca:** mỗi tin gửi tạo một ca; ca nguy hiểm xếp đầu hàng dược sĩ, ca cần kiểm tra tiếp theo, ca AI tự xử lý (từ chối, không có dữ liệu) không vào hàng trừ khi khách bấm “Chuyển dược sĩ”.
+
+### Bổ sung UX: bốn mẫu thiết kế
+
+| Mẫu | Quyết định cụ thể | Chỗ trên prototype |
+|---|---|---|
+| **Giải thích cho người dùng (explanation)** | Tin gốc được tô vàng đúng cụm AI dựa vào; khối “Vì sao trợ lý làm vậy?” liệt kê từng bước (nhận dấu hiệu → luật → hành động → điều bị chặn); bảng “Đã chạy / Chờ duyệt / Bị chặn / Không dùng” cho từng tool. | Mốc **⑥**, và tô vàng ở mốc **②**, **⑤**; nhật ký tool ở màn dược sĩ. |
+| **Phơi bày điều khiển hệ thống (expose system control)** | Bảng điều khiển cho khách: bật/tắt giải thích, chữ lớn, “Thận trọng hơn” (mọi ca đều chuyển dược sĩ, AI không soạn đề xuất), “Chuyển dược sĩ ngay”, xoá cuộc trò chuyện, hoàn tác chuyển ca. Phần đã khoá hiển thị công khai: cảnh báo cấp cứu luôn bật, không lưu hồ sơ, không bán thuốc kê đơn, gợi ý chỉ sau duyệt. Khách chỉ có thể làm hệ thống **an toàn hơn**, không tắt được an toàn. | Mốc **⑦** và **③**. |
+| **Minh hoạ đầu vào khả dĩ (possible inputs)** | Nút tình huống mẫu nhóm theo mức rủi ro (K1–K9, ca thường); chip “Nên nêu: ai dùng thuốc, tuổi, bao lâu, thuốc đang dùng, bệnh nền”; ô nhập có ví dụ đủ thông tin; phiếu hỏi nhanh có trường bắt buộc (tuổi) và lỗi ngay tại trường. | Mốc **⑧**. |
+| **Hiệu chỉnh niềm tin (trust calibration)** | Không dùng phần trăm vì chưa có dữ liệu hiệu chuẩn. Mỗi câu trả lời tách **Biết / Chưa biết / Không thể làm**; nêu giới hạn (ví dụ nhận diện theo từ khoá nên có thể bỏ sót, cảnh báo có thể báo nhầm) và cách khách tự kiểm; khối “Khi nào nên tin trợ lý?” (tin khi nhắc cấp cứu hoặc nói “tôi không biết”; tự kiểm với lời khai; không dựa vào cho chẩn đoán, liều, tồn kho, an toàn thai kỳ). Nút “Đúng ý / Chưa đúng, sửa lại” ghi nhận đánh giá trong phiên, không lưu hồ sơ. | Mốc **②**, **⑨**. |
+
+Phần G1 (nhãn “trợ lý AI, không phải dược sĩ” và hộp “làm được / chỉ làm khi có người duyệt / không làm”) nằm ở mốc **①**.
+
+| Mốc trên màn hình | Thể hiện gì | Nguyên tắc / mức tự chủ |
+|---|---|---|
+| ① | Khách đang trò chuyện với AI, không phải dược sĩ; phạm vi làm/không làm. | G1. |
+| ② | Căn cứ trích từ tin gốc, chia biết / chưa biết / không thể làm; luôn hiện. | G10, G11; chặn tự gợi ý khi thiếu căn cứ. |
+| ③ | Bước tiếp theo do khách chọn: sửa tin, bổ sung, hoàn tác chuyển ca, chuyển dược sĩ; ca khẩn xác nhận đã đọc. | G10; `chuyen_duoc_si` tự làm có hoàn tác. |
+| ④ | Bản nháp sản phẩm chỉ hiện cho dược sĩ, nút duyệt/từ chối. | `goi_y_san_pham` cần dược sĩ duyệt. |
+| ⑤ | Tin gốc nguyên văn (tô vàng dấu hiệu), phần thiếu, lời khai chưa xác minh phía dược sĩ. | G11. |
+| ⑥ | “Vì sao trợ lý làm vậy?” và trạng thái từng tool. | Explanation; mức tự chủ từng tool trong §4. |
+| ⑦ | Bảng điều khiển của khách và phần đã khoá. | Expose system control. |
+| ⑧ | Ca mẫu, gợi ý cách nhập, phiếu hỏi nhanh. | Possible inputs. |
+| ⑨ | Giới hạn, cách tự kiểm, “khi nào nên tin”, đánh giá đúng ý. | Trust calibration. |
+
+**Cách chạy thử:** mở file; bấm lần lượt K1, K2, K9 ở cột phải; mở tab dược sĩ để xem hàng ca và nhật ký tool; bật “Thận trọng hơn” rồi gửi ca thông thường để thấy AI không soạn đề xuất; thử K4 và điền phiếu hỏi nhanh.
+
+**Ảnh minh chứng:** [Màn hình khách](./prototype/khach.png) (K1 và K2, thấy mốc ①–③, ⑥–⑨) và [Màn hình dược sĩ](./prototype/duoc-si.png) (K1, K2 và ca thường, thấy mốc ④, ⑤), chụp từ bản hiện tại. Mở nhanh một ca bằng đường dẫn, ví dụ `index.html#K1+K2` hoặc `index.html#K1+K2+N,pharm`.
+
+**Quyết định giao diện:** Chọn nhãn trạng thái “cần hành động ngay / cần dược sĩ / đang chờ duyệt” cùng dấu hiệu trích nguyên văn vì người dùng có thể kiểm xem AI đã hiểu nhầm chỗ nào. Đã cân nhắc phần trăm độ tin cậy, nhưng không có dữ liệu hiệu chuẩn nên dễ tạo cảm giác chính xác giả; thay bằng biết / chưa biết / không thể làm. Đã cân nhắc nút “Đặt ngay” dưới bản nháp, nhưng nó biến bản nháp chưa duyệt thành gợi ý có tác động thực; nút gửi chỉ ở phía dược sĩ. Đã cân nhắc ẩn lý do chuyển người để giao diện gọn, nhưng giữ lý do và trường thiếu để phụ huynh biết cần bổ sung gì. Đã cân nhắc cho khách tắt cảnh báo hoặc tắt sàng lọc để nhanh hơn; không cho, vì điều khiển của khách chỉ được đẩy hệ thống về phía thận trọng hơn.
